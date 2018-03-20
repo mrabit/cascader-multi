@@ -1,6 +1,10 @@
 # cascader-multi
 
 > 基于[iView-Cascader](https://www.iviewui.com/components/cascader)的多选级联选择器
+## install 安装
+```shell
+npm i iview-cascader-multi --save
+```
 
 ## use 使用
 
@@ -46,16 +50,15 @@ handleChangeEndCode|选择完成后的回调，返回值此时已选的数据数
 > - 传入data数据格式如下：
 >   ```javascript
 >   [
->       {
->           value: 1000,
->           label: '接通',
->           children: {
->             label: "已报价",
->             value: 1100,
->             children: [
->             ],
->           }
->       },
+>     {
+>       value: 1000,
+>       label: "接通",
+>       children: [{
+>         label: "已报价",
+>         value: 1100,
+>         children: []
+>       }]
+>     }
 >   ]
 >   ```
 
