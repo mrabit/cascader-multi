@@ -1,23 +1,35 @@
 # cascader-multi
 
-> 基于iView-Cascader的多选级联选择器
+> 基于[iView-Cascader](https://www.iviewui.com/components/cascader)的多选级联选择器
 
-## 用法
+## use 使用
 
-``` bash
-# install dependencies
-npm install
+在main.js中写入下面的代码
+``` javascript
+import cascaderMulti from "cascader-multi";
+Vue.use(cascaderMulti);
+```
 
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
+接下来，你就可以在页面中使用cascader-multi了
+```html
+<template>
+    <cascaderMulti @handleChangeEndCode="array => end_code = array" :data="end_codes" placeholder="状态码"></cascaderMulti>
+</template>
+<script>
+    export default {
+        data () {
+            return {
+                end_code: [],
+                end_codes: []
+            }
+        }
+    }
+</script>
 ```
 
 属性  |  说明  |  类型  |  默认值
 :-------: | -------  |  :-------:  |  :-------:
-<small>data</small>|<small>用于渲染页面的数据</small>|Array|无
+data|用于渲染页面的数据|Array|无
 disabled|是否禁用选择器|Boolean|false
 clearable|是否支持清除|Boolean|true
 size|输入框大小，可选值为`large`和`small`或者不填|String|-
@@ -32,7 +44,7 @@ handleChangeEndCode|选择完成后的回调，返回值此时已选的数据数
 
 #### 补充说明
 > - 传入data数据格式如下：
->   ```
+>   ```javascript
 >   [
 >       {
 >           value: 1000,
@@ -46,3 +58,27 @@ handleChangeEndCode|选择完成后的回调，返回值此时已选的数据数
 >       },
 >   ]
 >   ```
+
+### 文件目录
+```
+.
+├── README.md
+├── package.json
+├── webpack.config.js
+├── .gitignore
+├── .gitattributes
+├── .babelrc
+├── src
+│   ├── lib
+│   │   ├── cascader-multi
+│   │   │   ├── index.js
+│   │   │   ├── cascader-multi-panel.vue
+│   │   │   └── cascader-multi.vue
+│   │   └── directives
+│   │       ├── transfer-dom.js
+│   │       └── clickoutside.js
+│   └── index.js
+├── dist
+│   ├── cascader-multi.js
+│   └── cascader-multi.js.map
+```
