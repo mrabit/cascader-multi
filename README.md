@@ -3,7 +3,7 @@
 > 基于[iView-Cascader](https://www.iviewui.com/components/cascader)的多选级联选择器
 ## install 安装
 ```shell
-npm i iview-cascader-multi --save
+npm i cascader-multi --save
 ```
 
 ## use 使用
