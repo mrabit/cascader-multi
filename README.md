@@ -1,6 +1,10 @@
 # cascader-multi
 
 > 基于[iView-Cascader](https://www.iviewui.com/components/cascader)的多选级联选择器
+
+## 效果预览
+![](https://blog.mrabit.com/Uploads/Picture/2018-03-21/1521601545.gif)
+
 ## install 安装
 ```shell
 npm i cascader-multi --save
