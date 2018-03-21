@@ -125,16 +125,6 @@
       // 格式化数据,所有对象加上parentId字段
       formatData() {
         return this.handleFormatData(this.data);
-      },
-      // 生出组件唯一标示,用于区分组件
-      componentId() {
-        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(
-          c
-        ) {
-          var r = (Math.random() * 16) | 0,
-            v = c == "x" ? r : (r & 0x3) | 0x8;
-          return v.toString(16);
-        });
       }
     },
     methods: {
