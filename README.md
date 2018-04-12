@@ -21,7 +21,7 @@ Vue.use(cascaderMulti);
 接下来，你就可以在页面中使用cascader-multi了
 ```html
 <template>
-    <cascaderMulti @handleChangeEndCode="array => end_code = array" :data="end_codes" placeholder="状态码"></cascaderMulti>
+    <cascaderMulti @on-change="array => end_code = array" :data="end_codes" placeholder="状态码"></cascaderMulti>
 </template>
 <script>
     export default {
@@ -38,6 +38,9 @@ Vue.use(cascaderMulti);
 属性  |  说明  |  类型  |  默认值
 :-------: | -------  |  :-------:  |  :-------:
 data|用于渲染页面的数据|Array|无
+value|默认已选择数据项|Array|无
+multiple|是否支持多选|Boolean|false
+filterable|是否支持搜索|Boolean|true
 disabled|是否禁用选择器|Boolean|false
 clearable|是否支持清除|Boolean|true
 size|输入框大小，可选值为`large`和`small`或者不填|String|-
@@ -48,7 +51,7 @@ name|给表单元素设置 name，详见 iView-Form 用法。|String|-
 
 事件  |  说明  |  返回值
 :-------: | -------  |  :-------:
-handleChangeEndCode|选择完成后的回调，返回值此时已选的数据数组|data
+on-change|选择完成后的回调，返回值此时已选的数据数组|data
 
 #### 补充说明
 > - 传入data数据格式如下：
@@ -60,7 +63,8 @@ handleChangeEndCode|选择完成后的回调，返回值此时已选的数据数
 >       children: [{
 >         label: "已报价",
 >         value: 1100,
->         children: []
+>         children: [],
+>         multiple: true //可忽略项，当为true时该项为多选
 >       }]
 >     }
 >   ]
@@ -77,13 +81,12 @@ handleChangeEndCode|选择完成后的回调，返回值此时已选的数据数
 ├── .babelrc
 ├── src
 │   ├── lib
-│   │   ├── cascader-multi
+│   │   ├── components
 │   │   │   ├── index.js
 │   │   │   ├── cascader-multi-panel.vue
 │   │   │   └── cascader-multi.vue
-│   │   └── directives
-│   │       ├── transfer-dom.js
-│   │       └── clickoutside.js
+│   │   └── utils
+│   │       └── index.js
 │   └── index.js
 ├── dist
 │   ├── cascader-multi.js

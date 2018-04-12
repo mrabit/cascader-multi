@@ -1,4 +1,4 @@
-import cascaderMulti from "./lib/cascader-multi";
+import cascaderMulti from "./lib/components";
 
 const iViewCasMulti = {
   cascaderMulti

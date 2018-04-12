@@ -2,14 +2,25 @@
   <div :class="classes" v-clickoutside="handleClose">
     <div :class="[prefixCls + '-rel']" @click="toggleOpen" ref="reference">
       <input type="hidden" :name="name" :value="currentValue">
-      <i-input :element-id="elementId" ref="input" class="text-ellipsis" :title="displayRender" :readonly="true" :disabled="disabled" :value="displayRender" :size="size" :placeholder="inputPlaceholder"></i-input>
+      <i-input @on-focus="handleFocus" @on-change="handleInput" :element-id="elementId" ref="input" class="text-ellipsis" :title="displayInputRender" :readonly="!filterable" :disabled="disabled" :value="displayInputRender" :size="size" :placeholder="inputPlaceholder"></i-input>
+      <div :class="[prefixCls + '-label']" v-show="filterable && query === ''" @click="handleFocus">{{ displayRender }}</div>
       <Icon type="ios-close" :class="[prefixCls + '-arrow']" v-show="showCloseIcon" @click.native.stop="clearSelect"></Icon>
       <Icon type="arrow-down-b" :class="[prefixCls + '-arrow']"></Icon>
     </div>
     <transition name="slide-up">
-      <div class="ivu-select-dropdown cascader-multi" v-show="visible" v-if="!destroy" :class="{ [prefixCls + '-transfer']: transfer }" ref="drop" :data-transfer="transfer" v-transfer-dom>
+      <div class="ivu-select-dropdown cascader-multi" v-show="visible" :class="{ [prefixCls + '-transfer']: transfer }" ref="drop" :data-transfer="transfer" v-transfer-dom v-if="!destroy">
         <div>
-          <casMultiPanel v-if="data.length" @handleGetSelected="selectedData" :data="formatData"></casMultiPanel>
+          <casMultiPanel :value="queryItem" v-if="((data.length && !filterable) || (filterable && query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" :data="formatData" :multiple="multiple"></casMultiPanel>
+          <div :class="[prefixCls + '-dropdown']" v-show="filterable && query !== '' && querySelections.length">
+            <ul :class="[selectPrefixCls + '-dropdown-list']">
+              <li :key="index" :class="[selectPrefixCls + '-item', {
+                                    [selectPrefixCls + '-item-disabled']: item.disabled
+                                }]" v-for="(item, index) in querySelections" @click="handleSelectItem(index)" v-html="item.display"></li>
+            </ul>
+          </div>
+          <ul v-show="filterable && query !== '' && !querySelections.length" :class="[prefixCls + '-not-found-tip']">
+            <li>暂无数据</li>
+          </ul>
         </div>
       </div>
     </transition>
@@ -17,12 +28,24 @@
 </template>
 <script>
 import casMultiPanel from "./cascader-multi-panel.vue";
-import clickoutside from "../directives/clickoutside";
-import TransferDom from "../directives/transfer-dom";
+import clickoutside from "iview/src/directives/clickoutside";
+import TransferDom from "iview/src/directives/transfer-dom";
+import {
+  oneOf
+} from 'iview/src/utils/assist';
+import Emitter from 'iview/src/mixins/emitter';
+import Locale from 'iview/src/mixins/locale';
+import {
+  getSelections,
+  getSelectItem
+} from '../utils';
+
 const prefixCls = "ivu-cascader";
 const selectPrefixCls = "ivu-select";
+
 export default {
   name: "cascaderMulti",
+  mixins: [Emitter, Locale],
   directives: {
     clickoutside,
     TransferDom
@@ -39,10 +62,26 @@ export default {
       // 是否销毁,用于清除数据销毁组件重新渲染
       destroy: false,
       // 已选择项
-      selected: []
+      selected: [],
+      // 搜索条件
+      query: '',
+      // 搜索后需要的数据
+      queryItem: []
     };
   },
   props: {
+    // 默认数据
+    value: {
+      type: Array,
+      default () {
+        return [];
+      }
+    },
+    // 是否支持搜索
+    filterable: {
+      type: Boolean,
+      default: true
+    },
     // 绑定数据
     data: {
       type: Array,
@@ -81,6 +120,16 @@ export default {
     // 输入框占位符
     placeholder: {
       type: String
+    },
+    // 是否多选
+    multiple: {
+      type: Boolean,
+      default: false
+    },
+    // 分隔符
+    separate: {
+      type: String,
+      default: "/"
     }
   },
   computed: {
@@ -89,8 +138,10 @@ export default {
         `${prefixCls}`,
         {
           [`${prefixCls}-show-clear`]: this.showCloseIcon,
+          [`${prefixCls}-size-${this.size}`]: !!this.size,
           [`${prefixCls}-visible`]: this.visible,
-          [`${prefixCls}-disabled`]: this.disabled
+          [`${prefixCls}-disabled`]: this.disabled,
+          [`${prefixCls}-not-found`]: this.filterable && this.query !== '' && !this.querySelections.length
         }
       ];
     },
@@ -109,7 +160,10 @@ export default {
       for (let i = 0; i < this.selected.length; i++) {
         label.push(this.selected[i].label);
       }
-      return label.join("，");
+      return label.join(this.separate);
+    },
+    displayInputRender() {
+      return this.filterable ? '' : this.displayRender;
     },
     // 输入框占位符取值
     inputPlaceholder() {
@@ -124,13 +178,48 @@ export default {
     // 格式化数据,所有对象加上parentId字段
     formatData() {
       return this.handleFormatData(this.data);
+    },
+    // 生成搜索结果
+    querySelections() {
+      let selections = [];
+      // 禁止搜索，则不需要生成搜索结果
+      if (!this.filterable) return selections;
+      getSelections(this.data, null, null, selections);
+      selections = selections.filter(item => {
+        return item.label ? item.label.indexOf(this.query) > -1 : false;
+      }).map(item => {
+        item.display = item.display.replace(new RegExp(this.query, 'g'), `<span>${this.query}</span>`);
+        return item;
+      });
+      return selections;
     }
   },
   methods: {
+    // 点击搜索结果
+    handleSelectItem(index) {
+      const item = this.querySelections[index];
+      if (item.item.disabled) return false;
+      this.query = '';
+      this.$refs.input.currentValue = '';
+      let temp_data = [];
+      getSelectItem(this.data, item.value.split(','), temp_data);
+      this.selectedData(temp_data);
+      this.queryItem = temp_data;
+      this.handleClose();
+    },
+    handleInput(event) {
+      this.query = event.target.value;
+      this.onFocus();
+    },
+    handleFocus(event) {
+      this.query = '';
+      this.$refs.input.focus();
+      // event.target.value = '';
+    },
     // 子组件传值
     selectedData(val = []) {
       this.selected = val;
-      this.$emit("handleChangeEndCode", this.currentValue);
+      this.$emit("on-change", this.currentValue);
     },
     // 清除选择项
     clearSelect() {
@@ -138,6 +227,7 @@ export default {
       this.selectedData();
       this.handleClose();
       // 销毁组件
+      this.queryItem = [];
       this.destroy = true;
     },
     // 关闭dropDown
@@ -158,8 +248,10 @@ export default {
       if (this.disabled) return;
       this.visible = true;
     },
+    // 格式化数据,所有对象加上parentId字段
     handleFormatData(data, parentId) {
       return data.map((k, v) => {
+        if (typeof v['parentId'] != 'undefined') return v;
         k["parentId"] = parentId || 0;
         if (k.children && k.children.length) {
           k.children = this.handleFormatData(k.children, k.value);
@@ -177,6 +269,11 @@ export default {
         });
       }
     }
+  },
+  mounted() {
+    if (!this.value.length) return;
+    getSelectItem(this.data, this.value, this.queryItem);
+    this.selectedData(this.queryItem);
   }
 };
 

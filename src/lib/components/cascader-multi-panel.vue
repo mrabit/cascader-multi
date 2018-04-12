@@ -1,11 +1,10 @@
 <template>
-  <span>
+  <div class="inline">
     <ul class="ivu-cascader-menu">
       <CheckboxGroup v-model="checkBoxGroup" @on-change="handleCheckBoxChange">
-        <li class="ivu-cascader-menu-item" v-for="(item, index) in data" :key="index" 
-          :class="{'ivu-cascader-menu-item-active': !item.parentId && selected == index}">
-          <template v-if="item.parentId">
-            <Checkbox @click.native.stop="handleCheckBoxClick" :label="index" class="w-full">{{item.label}}
+        <li class="ivu-cascader-menu-item" v-for="(item, index) in data" :key="index" :class="{'ivu-cascader-menu-item-active': (!item.parentId && selected == index )|| (!multiple && selected == index)}">
+          <template v-if="(item.parentId && multiple) || item.multiple">
+            <Checkbox :value="checkBoxGroup.indexOf(index) >= 0" @click.native.stop="handleCheckBoxClick" :label="index" class="w-full">{{item.label}}
               <i class="ivu-icon ivu-icon-ios-arrow-right" v-if="item.children && item.children.length"></i>
             </Checkbox>
           </template>
@@ -18,15 +17,29 @@
         </li>
       </CheckboxGroup>
     </ul>
-    <casMultiPanel @handleGetSelected="selectedData" v-if="children.length && !destroy" 
-      :data="children.length && children"></casMultiPanel>        
-  </span>
+    <casMultiPanel :value="value" @handleGetSelected="selectedData" v-if="children.length" :data="children.length && children" :multiple="multiple"></casMultiPanel>
+  </div>
 </template>
 <script>
+import Emitter from 'iview/src/mixins/emitter';
 export default {
   name: "casMultiPanel",
+  mixins: [Emitter],
   props: {
+    // 原始数据
     data: {
+      type: Array,
+      default () {
+        return [];
+      }
+    },
+    // 是否多选
+    multiple: {
+      type: Boolean,
+      default: false
+    },
+    // 默认绑定的值
+    value: {
       type: Array,
       default () {
         return [];
@@ -39,21 +52,16 @@ export default {
       checkBoxGroup: [],
       // 子组件数据
       children: [],
-      // 子组件选中数据
-      childrenSelected: [],
-      // 一级组件被选中高亮
-      selected: -1,
-      destroy: false
+      // 单选组件被选中高亮
+      selected: -1
     };
   },
   watch: {
     // 重新渲染组件
-    destroy(val) {
-      if (val) {
-        this.$nextTick(_ => {
-          this.destroy = false;
-        });
-      }
+    data(val) {
+      this.checkBoxGroup = [];
+      this.handleCheckBoxChange([]);
+      this.selected = -1;
     }
   },
   methods: {
@@ -64,13 +72,13 @@ export default {
         return {
           label: this.data[v].label,
           value: this.data[v].value,
-          parentId: this.data[v].parentId
+          parentId: this.data[v].parentId,
         };
       });
       // 合并子组件传递的参数,并emit到父组件
       this.$emit("handleGetSelected", arr.concat(val));
     },
-    //   防止时间冒泡到父组件handleClose事件
+    // 防止时间冒泡到父组件handleClose事件
     handleCheckBoxClick() {},
     // checkGroup变更事件,返回已选中的数组
     handleCheckBoxChange(arr) {
@@ -84,18 +92,38 @@ export default {
           Array.prototype.push.apply(this.children, this.data[k].children);
         }
       });
-      this.destroy = true;
       // 触发父组件emit
       this.selectedData();
     },
-    // 一级组件点击事件
+    // 单选组件点击事件
     handleClick(index) {
       this.selected = index;
       this.checkBoxGroup = [index];
       this.handleCheckBoxChange([index]);
-      this.destroy = true;
     }
+  },
+  created() {
+    // 回填数据
+    this.$nextTick(_ => {
+      this.value.map(v => {
+        this.data.map((val, k) => {
+          if (v.value !== val.value) return;
+          if ((v.parentId && this.multiple) || v.multiple) {
+            Array.prototype.push.apply(this.checkBoxGroup, [k]);
+            this.handleCheckBoxChange(this.checkBoxGroup);
+          } else {
+            this.handleClick(k);
+          }
+        })
+      })
+    })
   }
 };
 
 </script>
+<style>
+.inline {
+  display: inline-block;
+}
+
+</style>
