@@ -268,14 +268,6 @@ export default {
           this.destroy = false;
         });
       }
-    },
-    // 外部更新value绑定值
-    value() {
-      if (!this.value.length) return;
-      this.queryItem = [];
-      getSelectItem(this.data, this.value, this.queryItem);
-      this.selectedData(this.queryItem);
-      this.destroy = true;
     }
   },
   mounted() {
