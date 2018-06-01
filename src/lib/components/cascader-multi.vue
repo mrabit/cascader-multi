@@ -10,7 +10,7 @@
     <transition name="slide-up">
       <div class="ivu-select-dropdown cascader-multi" v-show="visible" :class="{ [prefixCls + '-transfer']: transfer }" ref="drop" :data-transfer="transfer" v-transfer-dom v-if="!destroy">
         <div>
-          <casMultiPanel :value="queryItem" v-if="((data.length && !filterable) || (filterable && query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" :data="formatData" :multiple="multiple"></casMultiPanel>
+          <casMultiPanel :value="queryItem" v-if="((data.length && !filterable) || (filterable && query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" @handleClose="handleClose" :data="formatData" :multiple="multiple"></casMultiPanel>
           <div :class="[prefixCls + '-dropdown']" v-show="filterable && query !== '' && querySelections.length">
             <ul :class="[selectPrefixCls + '-dropdown-list']">
               <li :key="index" :class="[selectPrefixCls + '-item', {
@@ -268,6 +268,14 @@ export default {
           this.destroy = false;
         });
       }
+    },
+    // 外部更新value绑定值
+    value() {
+      if (!this.value.length) return;
+      this.queryItem = [];
+      getSelectItem(this.data, this.value, this.queryItem);
+      this.selectedData(this.queryItem);
+      this.destroy = true;
     }
   },
   mounted() {

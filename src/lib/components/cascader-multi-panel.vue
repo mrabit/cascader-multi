@@ -9,7 +9,7 @@
             </Checkbox>
           </template>
           <template v-else>
-            <p @click="handleClick(index)">
+            <p @click="handleClick(index,true)" @mouseover="handleClick(index,false)">
               {{item.label}}
               <i class="ivu-icon ivu-icon-ios-arrow-right" v-if="item.children && item.children.length"></i>
             </p>
@@ -17,7 +17,7 @@
         </li>
       </CheckboxGroup>
     </ul>
-    <casMultiPanel :value="value" @handleGetSelected="selectedData" v-if="children.length" :data="children.length && children" :multiple="multiple"></casMultiPanel>
+    <casMultiPanel :value="value" @handleGetSelected="selectedData" v-if="children.length" :data="children.length && children" :multiple="multiple" @handleClose="handleClose"></casMultiPanel>
   </div>
 </template>
 <script>
@@ -53,7 +53,9 @@ export default {
       // 子组件数据
       children: [],
       // 单选组件被选中高亮
-      selected: -1
+      selected: -1,
+      // 是否触发关闭级联选择
+      isClose: true
     };
   },
   watch: {
@@ -65,6 +67,10 @@ export default {
     }
   },
   methods: {
+    // 点击最后一级,关闭级联选择器
+    handleClose() {
+      this.$emit('handleClose');
+    },
     // 获取选择项数据
     selectedData(val = []) {
       // 获取当前组件内选择的值
@@ -81,7 +87,7 @@ export default {
     // 防止时间冒泡到父组件handleClose事件
     handleCheckBoxClick() {},
     // checkGroup变更事件,返回已选中的数组
-    handleCheckBoxChange(arr) {
+    handleCheckBoxChange(arr,close) {
       // 清空记录
       this.children = [];
       // 遍历选择的数据
@@ -90,13 +96,16 @@ export default {
         if (this.data[k].children && this.data[k].children.length) {
           // 记录数据并渲染到子组件
           Array.prototype.push.apply(this.children, this.data[k].children);
+        }else if(!this.multiple && this.isClose){
+          this.handleClose();
         }
       });
       // 触发父组件emit
       this.selectedData();
     },
     // 单选组件点击事件
-    handleClick(index) {
+    handleClick(index,close) {
+      this.isClose = close;
       this.selected = index;
       this.checkBoxGroup = [index];
       this.handleCheckBoxChange([index]);
