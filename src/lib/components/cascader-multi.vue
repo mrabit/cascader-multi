@@ -10,7 +10,7 @@
     <transition name="slide-up">
       <div class="ivu-select-dropdown cascader-multi" v-show="visible" :class="{ [prefixCls + '-transfer']: transfer }" ref="drop" :data-transfer="transfer" v-transfer-dom v-if="!destroy">
         <div>
-          <casMultiPanel :value="queryItem" v-if="((data.length && !filterable) || (filterable && query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" @handleClose="handleClose" :data="formatData" :multiple="multiple"></casMultiPanel>
+          <casMultiPanel :value="queryItem" v-if="((data.length && !filterable) || (filterable && query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" @handleClose="handleClose" :data="formatData" :multiple="multiple" :trigger="trigger"></casMultiPanel>
           <div :class="[prefixCls + '-dropdown']" v-show="filterable && query !== '' && querySelections.length">
             <ul :class="[selectPrefixCls + '-dropdown-list']">
               <li :key="index" :class="[selectPrefixCls + '-item', {
@@ -88,6 +88,11 @@ export default {
       default () {
         return [];
       }
+    },
+    // 触发方式: click | hover
+    trigger: {
+      type: String,
+      default: "click"
     },
     // 禁用状态
     disabled: {

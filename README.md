@@ -41,6 +41,7 @@ data|用于渲染页面的数据|Array|无
 value|默认已选择数据项|Array|无
 multiple|是否支持多选|Boolean|false
 filterable|是否支持搜索|Boolean|true
+trigger|次级菜单展开方式，可选值为 click 或 hover|String|click
 disabled|是否禁用选择器|Boolean|false
 clearable|是否支持清除|Boolean|true
 size|输入框大小，可选值为`large`和`small`或者不填|String|-

@@ -9,7 +9,7 @@
             </Checkbox>
           </template>
           <template v-else>
-            <p @click="handleClick(index,true)" @mouseover="handleClick(index,false)">
+            <p @click="handleClick(index,true)" @mouseover="handleMouseOver(index)">
               {{item.label}}
               <i class="ivu-icon ivu-icon-ios-arrow-right" v-if="item.children && item.children.length"></i>
             </p>
@@ -32,6 +32,10 @@ export default {
       default () {
         return [];
       }
+    },
+    // 触发方式: click | hover
+    trigger: {
+      type: String
     },
     // 是否多选
     multiple: {
@@ -67,6 +71,12 @@ export default {
     }
   },
   methods: {
+    // 鼠标移上事件
+    handleMouseOver(index){
+      if(this.trigger == "hover"){
+        this.handleClick(index,false);
+      }
+    },
     // 点击最后一级,关闭级联选择器
     handleClose() {
       this.$emit('handleClose');
@@ -87,7 +97,7 @@ export default {
     // 防止时间冒泡到父组件handleClose事件
     handleCheckBoxClick() {},
     // checkGroup变更事件,返回已选中的数组
-    handleCheckBoxChange(arr,close) {
+    handleCheckBoxChange(arr, close) {
       // 清空记录
       this.children = [];
       // 遍历选择的数据
@@ -96,7 +106,7 @@ export default {
         if (this.data[k].children && this.data[k].children.length) {
           // 记录数据并渲染到子组件
           Array.prototype.push.apply(this.children, this.data[k].children);
-        }else if(!this.multiple && this.isClose){
+        } else if (!this.multiple && this.isClose && ) {
           this.handleClose();
         }
       });
@@ -104,7 +114,7 @@ export default {
       this.selectedData();
     },
     // 单选组件点击事件
-    handleClick(index,close) {
+    handleClick(index, close) {
       this.isClose = close;
       this.selected = index;
       this.checkBoxGroup = [index];
