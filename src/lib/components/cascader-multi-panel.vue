@@ -3,21 +3,25 @@
     <ul class="ivu-cascader-menu">
       <CheckboxGroup v-model="checkBoxGroup" @on-change="handleCheckBoxChange">
         <li class="ivu-cascader-menu-item" v-for="(item, index) in data" :key="index" :class="{'ivu-cascader-menu-item-active': (!item.parentId && selected == index )|| (!multiple && selected == index)}">
+          <!-- 多选checkbox -->
           <template v-if="(item.parentId && multiple) || item.multiple">
             <Checkbox :value="checkBoxGroup.indexOf(index) >= 0" @click.native.stop="handleCheckBoxClick" :label="index" class="w-full">{{item.label}}
+              <!-- 子级箭头标记 -->
               <i class="ivu-icon ivu-icon-ios-arrow-right" v-if="item.children && item.children.length"></i>
             </Checkbox>
           </template>
+          <!-- 单选p -->
           <template v-else>
             <p @click="handleClick(index)">
               {{item.label}}
+              <!-- 子级箭头标记 -->
               <i class="ivu-icon ivu-icon-ios-arrow-right" v-if="item.children && item.children.length"></i>
             </p>
           </template>
         </li>
       </CheckboxGroup>
     </ul>
-    <casMultiPanel :value="value" @handleGetSelected="selectedData" v-if="children.length" :data="children.length && children" :multiple="multiple" @handleClose="handleClose"></casMultiPanel>
+    <casMultiPanel :value="value" @handleGetSelected="selectedData" v-if="children && children.length" :data="children.length && children" :multiple="multiple" @handleClose="handleClose"></casMultiPanel>
   </div>
 </template>
 <script>

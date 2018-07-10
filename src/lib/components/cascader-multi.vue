@@ -10,7 +10,7 @@
     <transition name="slide-up">
       <div class="ivu-select-dropdown cascader-multi" v-show="visible" :class="{ [prefixCls + '-transfer']: transfer }" ref="drop" :data-transfer="transfer" v-transfer-dom v-if="!destroy">
         <div>
-          <casMultiPanel @handleClose="handleClose" :value="queryItem" v-if="((data.length && !filterable) || (filterable && query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" :data="formatData" :multiple="multiple"></casMultiPanel>
+          <casMultiPanel ref="asd" @handleClose="handleClose" :value="queryItem" v-if="((data.length && !filterable) || (filterable && query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" :data="formatData" :multiple="multiple"></casMultiPanel>
           <div :class="[prefixCls + '-dropdown']" v-show="filterable && query !== '' && querySelections.length">
             <ul :class="[selectPrefixCls + '-dropdown-list']">
               <li :key="index" :class="[selectPrefixCls + '-item', {
@@ -70,7 +70,7 @@ export default {
     };
   },
   props: {
-    // 默认数据
+    // 默认已选择数据
     value: {
       type: Array,
       default () {
@@ -82,7 +82,7 @@ export default {
       type: Boolean,
       default: true
     },
-    // 绑定数据
+    // 绑定数据源数据
     data: {
       type: Array,
       default () {
@@ -219,6 +219,7 @@ export default {
     // 子组件传值
     selectedData(val = []) {
       this.selected = val;
+      this.$emit("input", this.currentValue);
       this.$emit("on-change", this.currentValue);
     },
     // 清除选择项
@@ -258,6 +259,12 @@ export default {
         }
         return k;
       });
+    },
+    // 初始化数据
+    init() {
+      if (!this.value.length) return;
+      getSelectItem(this.data, this.value, this.queryItem);
+      this.selectedData(this.queryItem);
     }
   },
   watch: {
@@ -268,15 +275,23 @@ export default {
           this.destroy = false;
         });
       }
+    },
+    value(val) {
+      // 绑定的value更改后,判断和当前currentValue是否一致,不一致重新渲染组件
+      if (val.join(",") !== this.currentValue.join(",")) {
+        this.clearSelect();
+        this.init();
+      };
+    },
+    data() {
+      // 绑定数据源改变,清空选择项
+      this.clearSelect();
     }
   },
   mounted() {
-    if (!this.value.length) return;
-    getSelectItem(this.data, this.value, this.queryItem);
-    this.selectedData(this.queryItem);
+    this.init();
   }
 };
-
 </script>
 <style>
 .w-full {
@@ -310,5 +325,4 @@ export default {
   width: 80px;
   border: 1px solid #ccc;
 }
-
 </style>

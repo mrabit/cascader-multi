@@ -3,7 +3,7 @@
 > 基于[iView-Cascader](https://www.iviewui.com/components/cascader)的多选级联选择器
 
 ## 效果预览
-![](https://blog.mrabit.com/Uploads/Picture/2018-03-21/1521601545.gif)
+![image](https://ws3.sinaimg.cn/large/8fa21aabgy1ft4ttzw7f5g20gy0a7qr7.gif)
 
 ## install 安装
 ```shell
@@ -21,7 +21,7 @@ Vue.use(cascaderMulti);
 接下来，你就可以在页面中使用cascader-multi了
 ```html
 <template>
-    <cascaderMulti @on-change="array => end_code = array" :data="end_codes" placeholder="状态码"></cascaderMulti>
+    <cascaderMulti v-model="end_code" :data="end_codes" placeholder="状态码"></cascaderMulti>
 </template>
 <script>
     export default {
