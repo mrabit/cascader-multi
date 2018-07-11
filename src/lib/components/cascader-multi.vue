@@ -10,7 +10,7 @@
     <transition name="slide-up">
       <div class="ivu-select-dropdown cascader-multi" v-show="visible" :class="{ [prefixCls + '-transfer']: transfer }" ref="drop" :data-transfer="transfer" v-transfer-dom v-if="!destroy">
         <div>
-          <casMultiPanel ref="asd" @handleClose="handleClose" :value="queryItem" v-if="((data.length && !filterable) || (filterable && query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" :data="formatData" :multiple="multiple"></casMultiPanel>
+          <cas-multi-panel @handleClose="handleClose" :value="queryItem" v-if="(data.length && (!filterable || query === ''))" @handleGetSelected="selectedData" @clearQueryItem="queryItem = []" :data="data" :multiple="multiple"></cas-multi-panel>
           <div :class="[prefixCls + '-dropdown']" v-show="filterable && query !== '' && querySelections.length">
             <ul :class="[selectPrefixCls + '-dropdown-list']">
               <li :key="index" :class="[selectPrefixCls + '-item', {
@@ -34,7 +34,6 @@ import {
   oneOf
 } from 'iview/src/utils/assist';
 import Emitter from 'iview/src/mixins/emitter';
-import Locale from 'iview/src/mixins/locale';
 import {
   getSelections,
   getSelectItem
@@ -45,7 +44,7 @@ const selectPrefixCls = "ivu-select";
 
 export default {
   name: "cascaderMulti",
-  mixins: [Emitter, Locale],
+  mixins: [Emitter],
   directives: {
     clickoutside,
     TransferDom
@@ -175,10 +174,6 @@ export default {
         return k.value;
       });
     },
-    // 格式化数据,所有对象加上parentId字段
-    formatData() {
-      return this.handleFormatData(this.data);
-    },
     // 生成搜索结果
     querySelections() {
       let selections = [];
@@ -248,17 +243,6 @@ export default {
       // 禁用状态,不显示dropDown
       if (this.disabled) return;
       this.visible = true;
-    },
-    // 格式化数据,所有对象加上parentId字段
-    handleFormatData(data, parentId) {
-      return data.map((k, v) => {
-        if (typeof v['parentId'] != 'undefined') return v;
-        k["parentId"] = parentId || 0;
-        if (k.children && k.children.length) {
-          k.children = this.handleFormatData(k.children, k.value);
-        }
-        return k;
-      });
     },
     // 初始化数据
     init() {
